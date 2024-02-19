@@ -75,9 +75,13 @@ def zvol_akci():
                 print("Nebylo zadáno platne cislo, napis znova.")
                 break
         elif vyber == "5":
-            analyzer.seasonal_changes()
+            year = int(input("Zadejte rok: "))
+            analyzer.analyze_seasonal_changes(year)
         elif vyber == "6":
-            analyzer.detect_temperature_anomalies()
+            start = int(input("Zadejte počáteční rok: "))
+            end = int(input("Zadejte koncový rok: "))
+            print("Teplotní anomálie:")
+            print(analyzer.detect_temperature_anomalies(start, end))
         elif vyber == "7":
             start = int(input("Zadejte počáteční rok: "))
             end = int(input("Zadejte koncový rok: "))

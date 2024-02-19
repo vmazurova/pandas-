@@ -5,18 +5,44 @@ class TemperatureAnalyzer:
     def __init__(self, data):
         self.data = data
 
-    def seasonal_changes(self):
-        seasonal_data = self.data.groupby(self.data['měsíc']).mean()
-        print("Seasonal Changes:")
-        print(seasonal_data)
+    def analyze_seasonal_changes(self, year):
+        # Filtrujeme data pro zadaný rok
+        yearly_data = self.data[self.data['rok'] == year]
 
-    def detect_temperature_anomalies(self):
-        anomaly_threshold = 2
-        mean_temp = self.data['T-AVG'].mean()
-        anomalies = self.data[(self.data['T-AVG'] > mean_temp + anomaly_threshold * self.data['T-AVG'].std()) |
-                              (self.data['T-AVG'] < mean_temp - anomaly_threshold * self.data['T-AVG'].std())]
-        print("Temperature Anomalies:")
-        print(anomalies)
+        # Vytvoříme sloupec s měsícem
+        yearly_data.loc[:, 'měsíc'] = yearly_data['měsíc']
+
+        # Seskupíme data podle měsíce a spočítáme průměrnou teplotu
+        monthly_avg_temp = yearly_data.groupby('měsíc')['T-AVG'].mean()
+
+        # Vykreslíme graf sezónních změn
+        plt.plot(monthly_avg_temp.index, monthly_avg_temp.values, marker='o')
+        plt.title(f"Sezónní změny teploty v roce {year}")
+        plt.xlabel("Měsíc")
+        plt.ylabel("Průměrná teplota (°C)")
+        plt.xticks(range(1, 13),
+                   ['leden', 'únor', 'březen', 'duben', 'květen', 'červen', 'červenec', 'srpen', 'září', 'říjen',
+                    'listopad', 'prosinec'], rotation=45)
+        plt.grid(True)
+        plt.show()
+
+    def detect_temperature_anomalies(self, start_year, end_year):
+        anomaly_threshold = 2  # Práh pro detekci anomálií
+        anomalies = pd.DataFrame()
+
+        for year in range(start_year, end_year + 1):
+            annual_data = self.data[self.data['rok'] == year]
+            mean_temp = annual_data['T-AVG'].mean()
+            std_temp = annual_data['T-AVG'].std()
+            upper_threshold = mean_temp + anomaly_threshold * std_temp
+            lower_threshold = mean_temp - anomaly_threshold * std_temp
+
+            year_anomalies = annual_data[(annual_data['T-AVG'] > upper_threshold) | (annual_data['T-AVG'] < lower_threshold)]
+            if not year_anomalies.empty:
+                year_anomalies.loc[:, 'rok'] = year  # Přidání sloupce s rokem anomálie
+                anomalies = pd.concat([anomalies, year_anomalies])
+
+        return anomalies
 
     def plot_avg_temp(self, start_year, end_year):
         filtered_data = self.data[(self.data)["rok"] >= start_year & (self.data["rok"] <= end_year)]
