@@ -1,6 +1,6 @@
 import pandas as pd
 import temp
-import temp
+import graphs
 
 
 def load_data():
@@ -19,7 +19,6 @@ def menu():
     print("6 - Detekovat teplotní anomálie")
     print("7 - Vykreslit průměrné roční teploty")
     print("8 - Vykreslit denní teplotní trendy")
-    print("9 - Vykreslit minimální a maximální teploty pro konkrétní den")
     print("0 - Konec")
     vstup = input("Zadej akci:").upper()
     return vstup
@@ -28,6 +27,7 @@ def menu():
 def zvol_akci():
     data = load_data()
     analytik = temp.WeatherStatistics(data)
+    analyzer = graphs.TemperatureAnalyzer(data)
     while True:
         vyber = menu()
         if vyber == "1":
@@ -75,15 +75,17 @@ def zvol_akci():
                 print("Nebylo zadáno platne cislo, napis znova.")
                 break
         elif vyber == "5":
-            pass
+            analyzer.seasonal_changes()
         elif vyber == "6":
-            pass
+            analyzer.detect_temperature_anomalies()
         elif vyber == "7":
-            pass
+            start = int(input("Zadejte počáteční rok: "))
+            end = int(input("Zadejte koncový rok: "))
+            analyzer.plot_avg_temp(start,end)
         elif vyber == "8":
-            pass
-        elif vyber == "9":
-            pass
+
+            year = int(input("Zadejte rok: "))
+            analyzer.plot_daily_temperature_trends(year)
         elif vyber == "0":
             print("Konec")
             break
